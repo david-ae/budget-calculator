@@ -3,8 +3,8 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { WindowRef } from './windowRef';
-import { IndexDbService } from './services/index-db.service';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), WindowRef, IndexDbService],
+  providers: [provideRouter(routes), provideAnimationsAsync(), WindowRef],
 };

@@ -1,26 +1,24 @@
-import { Component, signal } from '@angular/core';
+import { AfterViewInit, Component, OnInit, signal } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormGroup,
   FormControl,
   Validators,
 } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { ExpenseDto } from './models/expense.dto';
 import { ItemDto } from './models/item.dto';
 import { IndexDbService } from './services/index-db.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    // NgxCurrencyDirective, MatButtonModule, ReactiveFormsModule
-  ],
+  imports: [MatButtonModule, NgxCurrencyDirective, ReactiveFormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent {
+export class AppComponent implements OnInit, AfterViewInit {
   calculatorForm!: FormGroup;
   detailsForm!: FormGroup;
 
@@ -29,7 +27,7 @@ export class AppComponent {
   percentageSum = signal<number>(0);
   expense = signal<ExpenseDto>({ baseAmount: 0, details: [] });
 
-  constructor(private indexDBService: IndexDbService) {
+  constructor() {
     this.calculatorForm = new FormGroup({
       baseAmount: new FormControl('', [Validators.required]),
       itemTitle: new FormControl('', [Validators.required]),
@@ -39,7 +37,7 @@ export class AppComponent {
   ngAfterViewInit(): void {}
 
   ngOnInit(): void {
-    this.indexDBService.getExpense();
+    // this.indexDBService.getExpense();
   }
 
   onBaseAmountChange(event: any) {
@@ -56,10 +54,10 @@ export class AppComponent {
       percentage: 0,
     };
     let d: ItemDto[] = [];
-    this.indexDBService.addExpense({
-      baseAmount: this.baseAmount(),
-      details: [...d, item],
-    });
+    // this.indexDBService.addExpense({
+    //   baseAmount: this.baseAmount(),
+    //   details: [...d, item],
+    // });
     this.items.update((i) => [...i, item]);
   }
 
