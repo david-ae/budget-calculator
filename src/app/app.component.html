@@ -40,13 +40,23 @@
   [formGroup]="detailsForm"
   class="mx-auto my-auto w-1/3 p-5 ssm:w-full xl:w-1/3 relative sm:rounded-lg overflow-clip flex flex-col h-96"
 >
-  <table class="w-full text-sm text-left rtl:text-right table-fixed">
-    <thead class="text-xs uppercase sticky top-0">
+  <table
+    class="w-full text-sm text-left rtl:text-right table-fixed mb-5 border-2"
+  >
+    <thead class="text-xs uppercase sticky top-0 text-center">
       <tr>
-        <th class="px-6 py-3">Total: ₦{{ amountSum() }}</th>
-        <th class="px-6 py-3">Percentage: {{ percentageSum() }}</th>
+        <th class="px-6 py-3">Budgeted</th>
+        <th class="px-6 py-3 ssm:text-">(%)</th>
+        <th class="px-6 py-3">Balance</th>
       </tr>
     </thead>
+    <tbody class="text-center">
+      <tr>
+        <td class="px-6 py-3">₦{{ amountSum() }}</td>
+        <td class="px-6 py-3 ssm:text-">{{ percentageSum() }}&nbsp;%</td>
+        <td class="px-6 py-3 italic">₦{{ balance() }}</td>
+      </tr>
+    </tbody>
   </table>
   <div class="flex-1 overflow-y-auto">
     <table class="w-full table-fixed">
@@ -56,18 +66,12 @@
           <td>{{ item.name }}</td>
           <td class="">
             <input
-              [currencyMask]="{
-                prefix: '₦ ',
-                thousands: ',',
-                decimal: '.',
-                align: 'center'
-              }"
               (keyup)="calculatePercentage($event, item)"
               [value]="item.amount"
               [formControlName]="item.name"
               type="text"
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Salary"
+              placeholder="0.00"
             />
           </td>
           <td class="text-center">{{ item.percentage }}%</td>

@@ -26,6 +26,7 @@ export class AppComponent implements OnInit {
   items = signal<ItemDto[]>([]);
   percentageSum = signal<number>(0);
   amountSum = signal<number>(0);
+  balance = signal<number>(0);
   expense = signal<ExpenseDto>({ baseAmount: 0, details: [] });
 
   constructor() {
@@ -70,24 +71,23 @@ export class AppComponent implements OnInit {
 
   calculatePercentage(event: any, item: ItemDto) {
     let money = this.retrieveAmount(event.target.value as string);
-
+    console.log(money);
     if (parseFloat(money) <= this.baseAmount()) {
       this.items().map((i) => {
         if (i.name === item.name) {
           console.log(money);
-          i.amount = +parseFloat(money).toFixed(2);
+          i.amount = Number.parseFloat(parseFloat(money).toFixed(2));
           i.percentage = +(
             (parseFloat(money) / this.baseAmount()) *
             100
           ).toFixed(2);
         }
       });
-      console.log(this.items());
       let newPercentageSum = this.items().reduce((a, b) => a + b.percentage, 0);
       let newAmountSum = this.items().reduce((a, b) => a + b.amount, 0);
-      console.log(newAmountSum);
       this.percentageSum.update((v) => (v = newPercentageSum));
       this.amountSum.update((v) => (v = newAmountSum));
+      this.balance.update(v => v = this.baseAmount() - newAmountSum);
     }
   }
 
