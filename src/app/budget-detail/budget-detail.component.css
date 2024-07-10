@@ -1,0 +1,19 @@
+.md-button.md-raised.md-primary.formPage:not([disabled]) {
+  position: right !important;
+  color: #ffffff;
+  background-color: #008cba;
+}
+
+.mat-mdc-raised-button[disabled],
+.mat-mdc-raised-button.mat-mdc-button-disabled {
+  cursor: default;
+  pointer-events: none;
+  color: var(--mdc-protected-button-disabled-label-text-color);
+  background-color: #7b1fa2;
+}
+
+th {
+  position: sticky;
+  top: 5rem;
+  background: white;
+}
