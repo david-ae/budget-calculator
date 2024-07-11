@@ -1,9 +1,6 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ExpenseDto } from '../models/expense.dto';
-import { WindowRef } from '../windowRef';
-import Dexie, { Table } from 'dexie';
-import { liveQuery } from 'dexie';
+import { liveQuery, Observable } from 'dexie';
 import { db } from '../db/app-database';
 
 @Injectable({
@@ -14,7 +11,7 @@ export class IndexDbService {
 
   constructor() {}
 
-  getAllBudgets() {
+  getAllBudgets(): Observable<ExpenseDto[]> {
     return this.budgets$;
   }
 

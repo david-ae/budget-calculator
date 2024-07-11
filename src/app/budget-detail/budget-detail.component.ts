@@ -31,9 +31,7 @@ export class BudgetDetailComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    this.indexDBService
-      .getAllBudgets()
-      .subscribe((items) => console.log(items));
+
   }
 
   onBaseAmountChange(event: any) {
@@ -71,7 +69,6 @@ export class BudgetDetailComponent implements OnInit{
     if (parseFloat(money) <= this.baseAmount()) {
       this.items().map((i) => {
         if (i.name === item.name) {
-          console.log(money);
           i.amount = Number.parseFloat(parseFloat(money).toFixed(2));
           i.percentage = +(
             (parseFloat(money) / this.baseAmount()) *
