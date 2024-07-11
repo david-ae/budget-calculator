@@ -24,7 +24,11 @@ export class NewBudgetComponent {
     });
   }
 
-  goBack(){
-this.router.navigate(['/home'])
+  goBack() {
+    this.router.navigate(['/home']);
+  }
+
+  createBudget() {
+    this.router.navigate(['/budget-detail']);
   }
 }

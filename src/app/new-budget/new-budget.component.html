@@ -30,5 +30,12 @@
     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
     placeholder="New Budget Name"
   />
-  <button mat-raised-button color="primary">Create</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="createBudget()"
+    [disabled]="!createNewBudgetForm.valid"
+  >
+    Create
+  </button>
 </div>
