@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ExpenseDto } from '../models/expense.dto';
+import { BudgetDto } from '../models/expense.dto';
 import { liveQuery, Observable } from 'dexie';
 import { db } from '../db/app-database';
 
@@ -11,11 +11,11 @@ export class IndexDbService {
 
   constructor() {}
 
-  getAllBudgets(): Observable<ExpenseDto[]> {
+  getAllBudgets(): Observable<BudgetDto[]> {
     return this.budgets$;
   }
 
-  async addExpense(record: ExpenseDto) {
+  async createBudget(record: BudgetDto) {
     await db.budgets.add(record);
   }
 

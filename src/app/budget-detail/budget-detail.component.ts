@@ -1,18 +1,25 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormGroup,
+  FormControl,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { ItemDto } from '../models/item.dto';
 import { IndexDbService } from '../services/index-db.service';
+import { SharedService } from '../services/shared.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
   imports: [MatButtonModule, NgxCurrencyDirective, ReactiveFormsModule],
   templateUrl: './budget-detail.component.html',
-  styleUrl: './budget-detail.component.css'
+  styleUrl: './budget-detail.component.css',
 })
-export class BudgetDetailComponent implements OnInit{
+export class BudgetDetailComponent implements OnInit {
   calculatorForm!: FormGroup;
   detailsForm!: FormGroup;
 
@@ -22,7 +29,13 @@ export class BudgetDetailComponent implements OnInit{
   amountSum = signal<number>(0);
   balance = signal<number>(0);
 
-  constructor(private indexDBService: IndexDbService) {
+  newBudget = false;
+
+  constructor(
+    private indexDBService: IndexDbService,
+    private sharedService: SharedService,
+    private router: Router
+  ) {
     this.calculatorForm = new FormGroup({
       baseAmount: new FormControl('', [Validators.required, Validators.min(1)]),
       itemTitle: new FormControl('', [Validators.required]),
@@ -31,7 +44,7 @@ export class BudgetDetailComponent implements OnInit{
   }
 
   ngOnInit(): void {
-
+    this.newBudget = this.sharedService.newBudget();
   }
 
   onBaseAmountChange(event: any) {
@@ -54,18 +67,17 @@ export class BudgetDetailComponent implements OnInit{
         percentage: 0,
       };
       let d: ItemDto[] = [];
-      this.indexDBService.addExpense({
-        name: 'monthly expense',
-        baseAmount: this.baseAmount(),
-        details: [...d, item],
-      });
+      // this.indexDBService.createBudget({
+      //   name: 'monthly expense',
+      //   baseAmount: this.baseAmount(),
+      //   details: [...d, item],
+      // });
       this.items.update((i) => [...i, item]);
     }
   }
 
   calculatePercentage(event: any, item: ItemDto) {
     let money = this.retrieveAmount(event.target.value as string);
-    console.log(money);
     if (parseFloat(money) <= this.baseAmount()) {
       this.items().map((i) => {
         if (i.name === item.name) {
@@ -88,6 +100,12 @@ export class BudgetDetailComponent implements OnInit{
     this.items().map(
       (i) => (i.percentage = +((i.amount / this.baseAmount()) * 100).toFixed(2))
     );
+  }
+
+  saveNewBudget() {}
+
+  goBack() {
+    this.router.navigate(['/new-budget']);
   }
 
   initCalculator() {}

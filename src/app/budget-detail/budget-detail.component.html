@@ -1,7 +1,28 @@
 <div [formGroup]="calculatorForm">
   <div
-    class="mx-auto my-auto w-1/3 p-5 gap-y-5 grid grid-col-1 ssm:w-full sm:w-3/4 xl:w-1/3"
+    class="mx-auto my-auto w-1/3 p-3 gap-y-5 grid grid-col-1 ssm:w-full sm:w-3/4 xl:w-1/3"
   >
+    <button
+      type="button"
+      (click)="goBack()"
+      class="flex items-center justify-center w-1/4 ssm:w-2/5 px-5 py-2 text-sm text-gray-700 transition-colors duration-200 bg-purple-300 border rounded-md gap-x-2"
+    >
+      <svg
+        class="w-5 h-5 rtl:rotate-180"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"
+        />
+      </svg>
+      <span>Go back</span>
+    </button>
     <input
       [currencyMask]="{
         prefix: '₦ ',
@@ -17,7 +38,7 @@
     />
   </div>
   <div
-    class="mx-auto my-auto w-1/3 grid grid-cols-2 gap-5 p-5 ssm:w-full sm:w-3/4 xl:w-1/3"
+    class="mx-auto my-auto w-1/3 grid grid-cols-2 gap-5 p-3 ssm:w-full sm:w-3/4 xl:w-1/3"
   >
     <input
       type="text"
@@ -38,7 +59,7 @@
 @if(items().length > 0){
 <div
   [formGroup]="detailsForm"
-  class="mx-auto my-auto w-1/3 p-5 ssm:w-full sm:w-3/4 xl:w-1/3 relative sm:rounded-lg overflow-clip flex flex-col h-96"
+  class="mx-auto my-auto w-1/3 p-3 ssm:w-full sm:w-3/4 xl:w-1/3 relative sm:rounded-lg overflow-clip flex flex-col h-96"
 >
   <table
     class="w-full text-sm text-left rtl:text-right table-fixed mb-5 border-2 rounded-lg"
@@ -87,6 +108,25 @@
       </tbody>
     </table>
   </div>
+  @if(newBudget){
+  <button
+    mat-raised-button
+    (click)="addExpenseItem()"
+    color="primary"
+    class="right-0"
+  >
+    Save Budget
+  </button>
+  } @else {
+  <button
+    mat-raised-button
+    (click)="addExpenseItem()"
+    class="right-0"
+    color="primary"
+  >
+    Update Budget
+  </button>
+  }
 </div>
 }@else {
 <div class="grid grid-cols-1 p-5 text-center">

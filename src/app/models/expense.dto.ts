@@ -1,7 +1,7 @@
 import { ItemDto } from './item.dto';
 
-export interface ExpenseDto {
-  id?:number;
+export interface BudgetDto {
+  id?: number;
   name: string;
   baseAmount: number;
   details: ItemDto[];
