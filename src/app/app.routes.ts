@@ -12,6 +12,11 @@ export const routes: Routes = [
     component: BudgetDetailComponent,
     title: 'Budget Detail',
   },
+  {
+    path: 'budget-detail/:id',
+    component: BudgetDetailComponent,
+    title: 'Budget Detail',
+  },
   { path: 'budgets', component: BudgetsComponent },
   { path: 'new-budget', component: NewBudgetComponent },
 ];

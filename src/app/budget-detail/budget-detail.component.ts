@@ -10,7 +10,7 @@ import { NgxCurrencyDirective } from 'ngx-currency';
 import { ItemDto } from '../models/item.dto';
 import { IndexDbService } from '../services/index-db.service';
 import { SharedService } from '../services/shared.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-budget-detail',
@@ -29,12 +29,15 @@ export class BudgetDetailComponent implements OnInit {
   amountSum = signal<number>(0);
   balance = signal<number>(0);
 
+  budgetName!: string;
   newBudget = false;
+  id!: string;
 
   constructor(
     private indexDBService: IndexDbService,
     private sharedService: SharedService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.calculatorForm = new FormGroup({
       baseAmount: new FormControl('', [Validators.required, Validators.min(1)]),
@@ -45,6 +48,15 @@ export class BudgetDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.newBudget = this.sharedService.newBudget();
+    this.sharedService.budget.subscribe((budget) => {
+      this.budgetName = budget.name;
+    });
+    this.route.queryParams.subscribe((params) => {
+      this.id = params['id'];
+      if (this.id) {
+        this.budgetData(this.id);
+      }
+    });
   }
 
   onBaseAmountChange(event: any) {
@@ -66,12 +78,7 @@ export class BudgetDetailComponent implements OnInit {
         amount: 0,
         percentage: 0,
       };
-      let d: ItemDto[] = [];
-      // this.indexDBService.createBudget({
-      //   name: 'monthly expense',
-      //   baseAmount: this.baseAmount(),
-      //   details: [...d, item],
-      // });
+
       this.items.update((i) => [...i, item]);
     }
   }
@@ -102,10 +109,56 @@ export class BudgetDetailComponent implements OnInit {
     );
   }
 
-  saveNewBudget() {}
+  budgetData(id: string) {
+    this.indexDBService.getBudget(parseInt(id)).subscribe((budget) => {
+      this.calculatorForm.setValue({
+        baseAmount: budget?.baseAmount,
+        itemTitle: budget?.name,
+      });
+      budget?.details.forEach((item) => {
+        this.detailsForm.addControl(
+          item.name,
+          new FormControl(item.amount, Validators.max(budget.baseAmount))
+        );
+      });
+      this.items.update((v) => (v = budget?.details as ItemDto[]));
+      this.baseAmount.update((v) => (v = budget?.baseAmount as number));
 
-  goBack() {
-    this.router.navigate(['/new-budget']);
+      let newPercentageSum = this.items().reduce((a, b) => a + b.percentage, 0);
+      let newAmountSum = this.items().reduce((a, b) => a + b.amount, 0);
+      this.percentageSum.update((v) => (v = newPercentageSum));
+      this.amountSum.update((v) => (v = newAmountSum));
+      this.balance.update((v) => (v = this.baseAmount() - newAmountSum));
+    });
+  }
+
+  saveNewBudget() {
+    this.indexDBService.createBudget({
+      name: this.budgetName,
+      baseAmount: this.baseAmount(),
+      details: [...this.items()],
+    });
+  }
+
+  goHome() {
+    this.router.navigate(['/home']);
+  }
+
+  goToViewBudgets() {
+    this.router.navigate(['/budgets']);
+  }
+
+  deleteItem(itemName: string) {
+    // console.log(this.items());
+    // var item = this.items().find((i) => i.name === itemName);
+    // console.log(item);
+    // if (item) {
+    //   var index = this.items().indexOf(item);
+    //   console.log(index);
+    // }
+    // this.items().splice(index, 1);
+
+    this.indexDBService.updateBudgetItems(this.id, itemName);
   }
 
   initCalculator() {}

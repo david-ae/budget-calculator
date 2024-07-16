@@ -1,28 +1,54 @@
 <div [formGroup]="calculatorForm">
   <div
+    class="mx-auto my-auto w-1/3 ssm:w-full p-3 gap-y-5 grid grid-col-1 sm:w-3/4 xl:w-1/3"
+  >
+    <div
+      class="flex items-center justify-center w-full px-5 py-2 text-sm text-gray-700 transition-colors duration-200 border font-bold rounded-md gap-x-2"
+    >
+      <span>Budget Detail</span>
+    </div>
+  </div>
+  <div
     class="mx-auto my-auto w-1/3 p-3 gap-y-5 grid grid-col-1 ssm:w-full sm:w-3/4 xl:w-1/3"
   >
-    <button
-      type="button"
-      (click)="goBack()"
-      class="flex items-center justify-center w-1/4 ssm:w-2/5 px-5 py-2 text-sm text-gray-700 transition-colors duration-200 bg-purple-300 border rounded-md gap-x-2"
-    >
-      <svg
-        class="w-5 h-5 rtl:rotate-180"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
+    <div class="flex justify-between">
+      <button
+        type="button"
+        (click)="goHome()"
+        class="flex items-center justify-center w-1/4 ssm:w-2/5 px-5 py-2 text-sm text-gray-700 transition-colors duration-200 bg-purple-300 border rounded-md gap-x-2"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"
-        />
-      </svg>
-      <span>Go back</span>
-    </button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          fill="#5f6368"
+        >
+          <path
+            d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"
+          />
+        </svg>
+        <span>Home</span>
+      </button>
+      <button
+        type="button"
+        (click)="goToViewBudgets()"
+        class="flex items-center justify-center w-1/4 ssm:w-2/5 px-5 py-2 text-sm text-gray-700 transition-colors duration-200 bg-purple-300 border rounded-md gap-x-2"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+          fill="#5f6368"
+        >
+          <path
+            d="M200-120q-33 0-56.5-23.5T120-200v-640h80v640h640v80H200Zm40-120v-360h160v360H240Zm200 0v-560h160v560H440Zm200 0v-200h160v200H640Z"
+          />
+        </svg>
+        <span>View Budgets</span>
+      </button>
+    </div>
     <input
       [currencyMask]="{
         prefix: '₦ ',
@@ -62,7 +88,7 @@
   class="mx-auto my-auto w-1/3 p-3 ssm:w-full sm:w-3/4 xl:w-1/3 relative sm:rounded-lg overflow-clip flex flex-col h-96"
 >
   <table
-    class="w-full text-sm text-left rtl:text-right table-fixed mb-5 border-2 rounded-lg"
+    class="w-full text-sm text-left rtl:text-right table-fixed mb-5 border-2 rounded-lg bg-purple-100"
   >
     <thead class="text-xs uppercase sticky top-0 text-center">
       <tr>
@@ -97,11 +123,12 @@
           </td>
           <td class="text-center">{{ item.percentage }}%</td>
           <td class="px-6 py-4">
-            <a
-              href="#"
+            <button
+              (click)="deleteItem(item.name)"
               class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-              >Delete</a
             >
+              Delete
+            </button>
           </td>
         </tr>
         }
@@ -111,7 +138,7 @@
   @if(newBudget){
   <button
     mat-raised-button
-    (click)="addExpenseItem()"
+    (click)="saveNewBudget()"
     color="primary"
     class="right-0"
   >

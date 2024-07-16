@@ -26,10 +26,9 @@ export class NewBudgetComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
-  goBack() {
+  goHome() {
     this.router.navigate(['/home']);
   }
 
@@ -39,7 +38,7 @@ export class NewBudgetComponent implements OnInit {
     const budget: BudgetDto = {
       name: name,
       details: [],
-      baseAmount: 0
+      baseAmount: 0,
     };
     this.sharedService.budget.next(budget);
     this.sharedService.newBudget.update((v) => (v = true));
