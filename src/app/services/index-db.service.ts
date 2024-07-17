@@ -22,7 +22,9 @@ export class IndexDbService {
   }
 
   checkBudgetName(budgetName: string) {
-    return liveQuery(() => db.budgets.filter((b) => b.name === budgetName));
+    return liveQuery(() =>
+      db.budgets.where('name').equalsIgnoreCase(budgetName).first()
+    );
   }
 
   updateBudget(id: number, budget: BudgetDto) {
