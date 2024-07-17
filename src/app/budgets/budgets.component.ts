@@ -4,6 +4,7 @@ import { IndexDbService } from '../services/index-db.service';
 import { BudgetDto } from '../models/expense.dto';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { SharedService } from '../services/shared.service';
 @Component({
   selector: 'app-budgets',
   standalone: true,
@@ -14,7 +15,11 @@ import { Router } from '@angular/router';
 export class BudgetsComponent implements OnInit {
   budgets: BudgetDto[] = [];
 
-  constructor(private indexDBService: IndexDbService, private router: Router) {}
+  constructor(
+    private indexDBService: IndexDbService,
+    private router: Router,
+    private sharedService: SharedService
+  ) {}
 
   ngOnInit(): void {
     this.indexDBService
@@ -23,11 +28,12 @@ export class BudgetsComponent implements OnInit {
   }
 
   viewBudget(id?: number) {
-    console.log(id);
-    this.indexDBService
-      .getBudget(id as number)
-      .subscribe((budget) => console.log(budget));
-    this.router.navigate(['/budget-detail'], { queryParams: { id: id } });
+    this.indexDBService.getBudget(id as number).subscribe((budget) => {
+      if (budget) {
+        this.sharedService.newBudget.update((v) => (v = false));
+        this.router.navigate(['/budget-detail'], { queryParams: { id: id } });
+      }
+    });
   }
 
   goHome() {
