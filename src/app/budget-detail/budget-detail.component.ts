@@ -129,11 +129,21 @@ export class BudgetDetailComponent implements OnInit {
   }
 
   saveNewBudget() {
-    this.indexDBService.createBudget({
-      name: this.budgetName,
-      baseAmount: this.baseAmount(),
-      details: [...this.items()],
-    });
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: 'Do you want to save this budget?',
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result === 'confirm') {
+          this.indexDBService.createBudget({
+            name: this.budgetName,
+            baseAmount: this.baseAmount(),
+            details: [...this.items()],
+          });
+          this.router.navigate(['/budgets']);
+        }
+      });
   }
 
   goHome() {
