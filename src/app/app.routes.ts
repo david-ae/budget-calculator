@@ -5,7 +5,7 @@ import { BudgetsComponent } from './budgets/budgets.component';
 import { NewBudgetComponent } from './new-budget/new-budget.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'budget-detail', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent, title: 'Budget Home' },
   {
     path: 'budget-detail',
