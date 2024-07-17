@@ -21,6 +21,10 @@ export class IndexDbService {
     return liveQuery(() => db.budgets.get(id));
   }
 
+  checkBudgetName(budgetName: string) {
+    return liveQuery(() => db.budgets.filter((b) => b.name === budgetName));
+  }
+
   updateBudget(id: number, budget: BudgetDto) {
     return db.budgets.update(id, {
       id: id,
