@@ -1,0 +1,76 @@
+<div
+  class="mx-auto my-auto w-1/3 ssm:w-full p-3 gap-y-5 grid grid-col-1 sm:w-3/4 xl:w-1/3"
+>
+  <div
+    class="flex items-center justify-center w-full px-5 py-2 text-sm text-gray-700 transition-colors duration-200 font-bold border rounded-md gap-x-2"
+  >
+    <span>Budgets</span>
+  </div>
+  <div class="flex justify-between">
+    <button
+      type="button"
+      (click)="goHome()"
+      class="flex items-center justify-center w-1/4 px-5 ssm:w-2/5 text-sm text-gray-700 transition-colors duration-200 bg-purple-300 border rounded-md gap-x-2"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24px"
+        viewBox="0 -960 960 960"
+        width="24px"
+        fill="#5f6368"
+      >
+        <path
+          d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"
+        />
+      </svg>
+      <span>Home</span>
+    </button>
+    <button
+      type="button"
+      (click)="goToCreateNewBudget()"
+      class="flex items-center justify-center w-1/4 ssm:w-2/5 px-5 py-2 text-sm text-gray-700 transition-colors duration-200 bg-purple-300 border rounded-md gap-x-2"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24px"
+        viewBox="0 -960 960 960"
+        width="24px"
+        fill="#5f6368"
+      >
+        <path
+          d="M200-120q-33 0-56.5-23.5T120-200v-640h80v640h640v80H200Zm40-120v-360h160v360H240Zm200 0v-560h160v560H440Zm200 0v-200h160v200H640Z"
+        />
+      </svg>
+      <span>New Budget</span>
+    </button>
+  </div>
+  <input
+    type="text"
+    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+    placeholder="Search Budgets"
+  />
+</div>
+<div
+  class="mx-auto my-auto w-1/3 ssm:w-4/5 sm:w-3/5 xl:w-1/3 border-gray-200 rounded-lg text-black mt-5 flex-1 overflow-y-auto h-96"
+>
+  @for (item of budgets; track $index) {
+  <button
+    (click)="viewBudget(item.id)"
+    type="button"
+    class="relative inline-flex items-center justify-center w-1/3 ssm:w-full sm:w-full px-4 py-2 text-sm font-medium border-b bg-purple-100 border-gray-200 rounded-t-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="24px"
+      viewBox="0 -960 960 960"
+      width="24px"
+      fill="#5f6368"
+    >
+      <path
+        d="M200-120q-33 0-56.5-23.5T120-200v-640h80v640h640v80H200Zm40-120v-360h160v360H240Zm200 0v-560h160v560H440Zm200 0v-200h160v200H640Z"
+      />
+    </svg>
+    &nbsp; {{ item.name }}&nbsp; - &nbsp;₦{{ item.baseAmount | number }}
+  </button>
+  }
+</div>
