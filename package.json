@@ -23,6 +23,7 @@
     "dexie": "^4.0.7",
     "ngx-currency": "^18.0.0",
     "ngx-indexed-db": "^18.0.0",
+    "ngx-toastr": "^19.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"

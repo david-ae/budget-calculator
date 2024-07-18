@@ -37,7 +37,7 @@ export class IndexDbService {
   }
 
   async createBudget(record: BudgetDto) {
-    await db.budgets.add(record);
+    return await db.budgets.add(record);
   }
 
   deleteBudget(id: number) {

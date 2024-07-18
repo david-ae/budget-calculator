@@ -14,6 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BudgetDto } from '../models/expense.dto';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-budget-detail',
@@ -29,7 +30,7 @@ export class BudgetDetailComponent implements OnInit {
   baseAmount = signal<number>(0);
   items = signal<ItemDto[]>([]);
   percentageSum = signal<number>(0);
-  amountSum = signal<number>(0);
+  amountSum = signal<string>('0');
   balance = signal<number>(0);
 
   budgetName!: string;
@@ -41,7 +42,8 @@ export class BudgetDetailComponent implements OnInit {
     private sharedService: SharedService,
     private router: Router,
     private route: ActivatedRoute,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private toastrService: ToastrService
   ) {
     this.calculatorForm = new FormGroup({
       baseAmount: new FormControl('', [Validators.required, Validators.min(1)]),
@@ -66,6 +68,9 @@ export class BudgetDetailComponent implements OnInit {
   onBaseAmountChange(event: any) {
     let money = this.retrieveAmount(event.target.value as string);
     this.baseAmount.update((b) => (b = parseFloat(money)));
+    if (this.items().length > 0) {
+      this.updatePercentages();
+    }
     this.updatePercentage();
   }
 
@@ -79,7 +84,7 @@ export class BudgetDetailComponent implements OnInit {
     if (!itemExists) {
       const item: ItemDto = {
         name: title,
-        amount: 0,
+        amount: '0',
         percentage: 0,
       };
 
@@ -92,9 +97,10 @@ export class BudgetDetailComponent implements OnInit {
     if (parseFloat(money) <= this.baseAmount()) {
       this.items().map((i) => {
         if (i.name === item.name) {
-          i.amount = Number.parseFloat(parseFloat(money).toFixed(2));
+          i.amount = parseFloat(parseFloat(money).toFixed(2)).toLocaleString();
+          let actualAmount = this.retrieveAmount(i.amount);
           i.percentage = +(
-            (parseFloat(money) / this.baseAmount()) *
+            (parseFloat(actualAmount) / this.baseAmount()) *
             100
           ).toFixed(2);
         }
@@ -105,7 +111,11 @@ export class BudgetDetailComponent implements OnInit {
 
   updatePercentage() {
     this.items().map(
-      (i) => (i.percentage = +((i.amount / this.baseAmount()) * 100).toFixed(2))
+      (i) =>
+        (i.percentage = +(
+          (parseFloat(i.amount) / this.baseAmount()) *
+          100
+        ).toFixed(2))
     );
   }
 
@@ -136,12 +146,18 @@ export class BudgetDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
-          this.indexDBService.createBudget({
-            name: this.budgetName,
-            baseAmount: this.baseAmount(),
-            details: [...this.items()],
-          });
-          this.router.navigate(['/budgets']);
+          this.indexDBService
+            .createBudget({
+              name: this.budgetName,
+              baseAmount: this.baseAmount(),
+              details: [...this.items()],
+            })
+            .then((response) => {
+              if (response) {
+                this.sharedService.newBudget.update((v) => (v = false));
+                this.toastrService.success('Budget Saved', 'Success');
+              }
+            });
         }
       });
   }
@@ -177,8 +193,13 @@ export class BudgetDetailComponent implements OnInit {
             details: this.items(),
             id: parseInt(this.id),
           };
-          this.indexDBService.updateBudget(parseInt(this.id), budget);
-          this.router.navigate(['/budgets']);
+          this.indexDBService
+            .updateBudget(parseInt(this.id), budget)
+            .then((response) => {
+              if (response) {
+                this.toastrService.success('Budget Updated', 'Success');
+              }
+            });
         }
       });
   }
@@ -191,8 +212,9 @@ export class BudgetDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
-          this.indexDBService.deleteBudget(parseInt(this.id));
-          this.router.navigate(['/budgets']);
+          this.indexDBService.deleteBudget(parseInt(this.id)).then(() => {
+            this.router.navigate(['/budgets']);
+          });
         }
       });
   }
@@ -201,9 +223,12 @@ export class BudgetDetailComponent implements OnInit {
 
   updatePercentages() {
     let newPercentageSum = this.items().reduce((a, b) => a + b.percentage, 0);
-    let newAmountSum = this.items().reduce((a, b) => a + b.amount, 0);
+    let newAmountSum = this.items().reduce(
+      (a, b) => a + parseFloat(this.retrieveAmount(b.amount)),
+      0
+    );
     this.percentageSum.update((v) => (v = newPercentageSum));
-    this.amountSum.update((v) => (v = newAmountSum));
+    this.amountSum.update((v) => (v = newAmountSum.toLocaleString()));
     this.balance.update((v) => (v = this.baseAmount() - newAmountSum));
   }
 
