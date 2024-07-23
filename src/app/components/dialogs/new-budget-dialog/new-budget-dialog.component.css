@@ -1,0 +1,5 @@
+.mdc-dialog__content,
+.mdc-dialog__title,
+.mat-mdc-button {
+  color: black;
+}

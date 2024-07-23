@@ -17,6 +17,10 @@ export const routes: Routes = [
     component: BudgetDetailComponent,
     title: 'Budget Detail',
   },
-  { path: 'budgets', component: BudgetsComponent },
-  { path: 'new-budget', component: NewBudgetComponent },
+  { path: 'budgets', component: BudgetsComponent, title: 'List of Budgets' },
+  {
+    path: 'new-budget',
+    component: NewBudgetComponent,
+    title: 'Create New Budget',
+  },
 ];

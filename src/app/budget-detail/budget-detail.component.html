@@ -1,13 +1,4 @@
-<div [formGroup]="calculatorForm">
-  <div
-    class="mx-auto my-auto w-1/3 ssm:w-full p-3 grid grid-col-1 sm:w-3/4 xl:w-1/3"
-  >
-    <div
-      class="flex items-center justify-center w-full px-5 py-2 text-sm text-gray-700 transition-colors duration-200 border font-bold rounded-md gap-x-2"
-    >
-      <span>Budget Detail</span>
-    </div>
-  </div>
+<div [formGroup]="baseAmountForm">
   <div
     class="mx-auto my-auto w-1/3 p-3 gap-y-2 grid grid-col-1 ssm:w-full sm:w-3/4 xl:w-1/3"
   >
@@ -30,6 +21,11 @@
         </svg>
         <span>Home</span>
       </button>
+      <div
+        class="flex items-center justify-center w-1/3 py-2 text-sm text-gray-700 transition-colors duration-200 font-bold gap-x-2"
+      >
+        <span>Budget Detail</span>
+      </div>
       <button
         type="button"
         (click)="goToViewBudgets()"
@@ -52,7 +48,7 @@
     <div
       class="flex items-center justify-center w-full px-5 py-2 text-sm text-gray-700 transition-colors duration-200 border font-bold rounded-md gap-x-2"
     >
-      <span>Budget Name: {{ budgetName }}</span>
+      <!-- <span>Budget Name: {{ budgetName }}</span> -->
     </div>
     <input
       [currencyMask]="{
@@ -65,33 +61,28 @@
       (keyup)="onBaseAmountChange($event)"
       type="text"
       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-      placeholder="Salary"
+      placeholder="Base Amount"
     />
   </div>
   <div
-    class="mx-auto my-auto w-1/3 grid grid-cols-2 gap-5 p-3 ssm:w-full sm:w-3/4 xl:w-1/3"
+    class="mx-auto my-auto w-1/3 grid grid-cols-1 gap-5 p-3 ssm:w-full sm:w-3/4 xl:w-1/3"
   >
-    <input
-      type="text"
-      placeholder="Item Title"
-      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-      formControlName="itemTitle"
-    />
     <button
       mat-raised-button
-      [disabled]="!calculatorForm.valid"
-      (click)="addExpenseItem()"
+      [disabled]="!baseAmountForm.valid"
+      (click)="addBudgetItem()"
       color="primary"
     >
       Add Item
     </button>
   </div>
 </div>
-@if(items().length > 0){
+
 <div
-  [formGroup]="detailsForm"
-  class="mx-auto my-auto w-1/3 p-3 ssm:w-full sm:w-3/4 xl:w-1/3 relative sm:rounded-lg overflow-clip flex flex-col h-96 ssm:h-[400px] md:h-[500px] sm:h-[500px] xl:h-[500px] lg:h-[500px]"
+  [formGroup]="budgetItemsForm"
+  class="mx-auto my-auto w-1/3 p-3 ssm:w-full sm:w-3/4 xl:w-1/3 relative sm:rounded-lg overflow-clip flex flex-col h-96 ssm:h-[400px] md:h-[500px] sm:h-[500px] xl:h-[400px] lg:h-[400px]"
 >
+  @if(itemControls.controls.length > 0){
   <table
     class="w-full text-sm text-left rtl:text-right table-fixed mb-5 border-2 rounded-lg bg-purple-100"
   >
@@ -104,36 +95,54 @@
     </thead>
     <tbody class="text-center">
       <tr>
-        <td class="px-6 py-3">₦{{ amountSum() }}</td>
+        <td class="px-6 py-3">₦{{ amountSum }}</td>
         <td class="px-6 py-3 ssm:text-">
-          {{ percentageSum().toFixed(2) }}&nbsp;%
+          {{ percentageSum.toFixed(2) }}&nbsp;%
         </td>
-        <td class="px-6 py-3 italic">₦{{ balance().toLocaleString() }}</td>
+        <td class="px-6 py-3 italic">₦{{ balance }}</td>
       </tr>
     </tbody>
   </table>
   <div class="flex-1 overflow-y-auto">
     <table class="w-full table-fixed">
-      <tbody class="">
-        @for(item of items();track $index ){
-        <tr class="border-b px-6 py-3">
-          <td>{{ item.name }}</td>
+      <tbody class="" formArrayName="items">
+        @for(item of itemControls.controls; track item; let i = $index){
+        <tr [formGroupName]="i" class="border-b px-6 py-3">
+          <td>
+            <input
+              formControlName="title"
+              type="text"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Item Name"
+            />
+          </td>
           <td class="">
             <input
-              (keyup)="calculatePercentage($event, item)"
-              [value]="item.amount"
-              [formControlName]="item.name"
+              [currencyMask]="{
+                prefix: '₦ ',
+                thousands: ',',
+                decimal: '.',
+                align: 'center'
+              }"
+              formControlName="amount"
               type="text"
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="0.00"
             />
           </td>
-          <td class="text-center">{{ item.percentage }}%</td>
+          <td class="text-center">
+            <!-- {{ (item.get("amount")?.value - 0 / budget.baseAmount) * 100 }}% -->
+            {{
+              ((item.get("amount")?.value / budget.baseAmount) * 100).toFixed(
+                2
+              )
+            }}%
+          </td>
           <td class="px-6 py-4">
             <button
-              (click)="deleteItem(item.name)"
+              (click)="deleteItem(item.get('name')?.value)"
               class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-              mat-raised-button
+              mat-button
               color="warn"
             >
               Delete
@@ -173,10 +182,5 @@
   >
     Save Budget
   </button>
-  }
+  } }
 </div>
-}@else {
-<div class="grid grid-cols-1 p-5 text-center">
-  <h1>No Items Added</h1>
-</div>
-}
