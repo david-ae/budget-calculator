@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormGroup,
@@ -18,33 +18,52 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { BudgetService } from '../services/budget.service';
-import { NewBudgetDialogComponent } from '../components/dialogs/new-budget-dialog/new-budget-dialog.component';
+import { NewBudgetItemDialogComponent } from '../components/dialogs/new-budgetItem-dialog/new-budgetItem-dialog.component';
+import { CommonModule } from '@angular/common';
+import { CustomValidators } from '../../validators/budget-usage.validator';
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [MatButtonModule, NgxCurrencyDirective, ReactiveFormsModule],
+  imports: [
+    MatButtonModule,
+    NgxCurrencyDirective,
+    ReactiveFormsModule,
+    CommonModule,
+  ],
   templateUrl: './budget-detail.component.html',
   styleUrl: './budget-detail.component.css',
 })
 export class BudgetDetailComponent implements OnInit {
+  toastrService = inject(ToastrService);
+  budgetService = inject(BudgetService);
+  sharedService = inject(SharedService);
+
   budgetItemsForm!: FormGroup;
   baseAmountForm!: FormGroup;
   myForm!: FormGroup;
 
-  budget!: BudgetDto;
-  amountSum!: number;
-  percentageSum!: number;
-  balance!: number;
+  budgetName!: string;
   newBudget!: boolean;
+  id!: string;
+
+  budget = signal<BudgetDto>({ name: '', baseAmount: 0, details: [] });
+
+  percentageSum = computed(() =>
+    this.budget().details.reduce((a, b) => a + b.percentage, 0)
+  );
+  amountSum = computed(() =>
+    this.budget().details.reduce((a, b) => a + b.amount, 0)
+  );
+  balance = computed(() => this.budget().baseAmount - this.amountSum());
+
+  items = signal<ItemDto[]>([]);
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     public dialog: MatDialog,
-    private toastrService: ToastrService,
-    private fb: FormBuilder,
-    private budgetService: BudgetService
+    private fb: FormBuilder
   ) {
     this.budgetItemsForm = fb.group({
       items: fb.array([]),
@@ -56,41 +75,99 @@ export class BudgetDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.amountSum = this.budgetService.amountSum();
-    this.percentageSum = this.budgetService.percentageSum();
-    // this.newBudget = this.sharedService.newBudget();
-    // this.sharedService.budget.subscribe((budget) => {
-    //   this.budgetName = budget.name;
-    // });
-    this.route.queryParams.subscribe((params) => {
-      // this.id = params['id'];
-      // if (this.id) {
-      //   this.budgetData(this.id);
-      // }
-    });
+    this.newBudget = this.budgetService.newBudget;
+    if (!this.newBudget) {
+      this.route.queryParams.subscribe((params) => {
+        this.id = params['id'];
+        if (this.id) {
+          this.budgetService.getBudget(this.id).subscribe((b) => {
+            this.budgetName = b?.name as string;
+            this.baseAmountForm.setValue({ baseAmount: b?.baseAmount });
+            b?.details.forEach((existingBudgetItem) => {
+              const item = this.fb.group({
+                budgetItem: new FormControl({
+                  value: existingBudgetItem.name,
+                  disabled: true,
+                }),
+                amount: new FormControl(existingBudgetItem.amount, [
+                  Validators.max(b.baseAmount),
+                ]),
+              });
+              this.itemControls.push(item);
+            });
+            this.budget.update((v) => (v = b as BudgetDto));
+            this.items.update((v) => (v = this.budget().details));
+          });
+        }
+      });
+    } else {
+      this.budget.update(
+        (v) => (v = { ...v, name: this.budgetService.budgetName })
+      );
+    }
   }
 
   onBaseAmountChange(event: any) {
-    this.budgetService.updateBaseAmount(event.target.value as string);
-    this.budget = this.budgetService.budget();
+    const newBaseAmount = this.budgetService.updateBaseAmount(
+      event.target.value as string
+    );
+    this.budget.update(
+      (v) => (v = { ...v, baseAmount: parseFloat(newBaseAmount) })
+    );
+    // this.items.update((v) => (v = this.budget().details));
   }
 
   addBudgetItem() {
     this.dialog
-      .open(NewBudgetDialogComponent, {data: 'name'})
+      .open(NewBudgetItemDialogComponent, { data: 'name' })
       .afterClosed()
-      .subscribe((result) => console.log(result));
-    const item = this.fb.group({
-      title: new FormControl('', Validators.required),
-      amount: new FormControl('', [
-        Validators.max(this.budgetService.budget().baseAmount),
-      ]),
-    });
-    this.itemControls.push(item);
+      .subscribe((result) => {
+        if (result === 'confirm') {
+          const item = this.fb.group({
+            budgetItem: new FormControl(
+              { value: this.sharedService.newBudgetItem, disabled: true },
+              Validators.required
+            ),
+            amount: new FormControl('', [
+              Validators.max(this.budget().baseAmount),
+              CustomValidators.BudgetUsageValidator(
+                this.budget().baseAmount,
+                this.amountSum()
+              ),
+            ]),
+          });
+          this.itemControls.push(item);
+          const budgetItem: ItemDto = {
+            name: this.sharedService.newBudgetItem,
+            amount: 0,
+            percentage: 0,
+          };
+          this.budget.update(
+            (v) => (v = { ...v, details: [...v.details, budgetItem] })
+          );
+          this.items.update((v) => (v = this.budget().details));
+        }
+      });
   }
 
-  calculatePercentage(amount: string) {
-    console.log(amount);
+  calculatePercentage(budgetItem: string) {
+    const control = this.itemControls.controls.find(
+      (c) => c.get('budgetItem')?.value == budgetItem
+    );
+    if (control) {
+      const amount = control.get('amount')?.value;
+      const percentage = (parseFloat(amount) / this.budget().baseAmount) * 100;
+      this.items().map((i) => {
+        if (i.name === budgetItem) {
+          i.amount = amount;
+          i.percentage = percentage;
+        }
+      });
+      this.budget.update((b) => (b = { ...b, details: this.items() }));
+      if (this.percentageSum() >= 100) {
+        this.baseAmountForm.setErrors({ invalid: true });
+      } else this.baseAmountForm.setErrors(null);
+    }
   }
 
   saveNewBudget() {
@@ -101,18 +178,13 @@ export class BudgetDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
-          // this.indexDBService
-          //   .createBudget({
-          //     name: this.budgetName,
-          //     baseAmount: this.baseAmount(),
-          //     details: [...this.items()],
-          //   })
-          //   .then((response) => {
-          //     if (response) {
-          //       this.sharedService.newBudget.update((v) => (v = false));
-          //       this.toastrService.success('Budget Saved', 'Success');
-          //     }
-          //   });
+          this.budgetService.saveNewBudget(this.budget()).then((response) => {
+            if (response) {
+              this.toastrService.success('Budget Saved');
+              this.budgetService.newBudget = false;
+              this.newBudget = this.budgetService.newBudget;
+            }
+          });
         }
       });
   }
@@ -125,7 +197,25 @@ export class BudgetDetailComponent implements OnInit {
     this.router.navigate(['/budgets']);
   }
 
-  deleteItem(itemName: string) {}
+  deleteItem(itemName: string) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: 'Do you want to delete this item from the budget?',
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result === 'confirm') {
+          this.itemControls.controls.forEach((control) => {
+            const budgetItemValue = control.get('budgetItem')?.value;
+            console.log(budgetItemValue, itemName);
+            if (budgetItemValue === itemName) {
+              var index = this.itemControls.controls.indexOf(control);
+              this.itemControls.controls.splice(index, 1);
+            }
+          });
+        }
+      });
+  }
 
   updateBudget() {
     this.dialog
@@ -141,13 +231,6 @@ export class BudgetDetailComponent implements OnInit {
           //   details: this.items(),
           //   id: parseInt(this.id),
           // };
-          // this.indexDBService
-          //   .updateBudget(parseInt(this.id), budget)
-          //   .then((response) => {
-          //     if (response) {
-          //       this.toastrService.success('Budget Updated', 'Success');
-          //     }
-          //   });
         }
       });
   }
@@ -160,9 +243,6 @@ export class BudgetDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
-          // this.indexDBService.deleteBudget(parseInt(this.id)).then(() => {
-          //   this.router.navigate(['/budgets']);
-          // });
         }
       });
   }

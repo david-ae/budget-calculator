@@ -1,4 +1,4 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { BudgetDto } from '../models/expense.dto';
 import { SharedService } from '../services/shared.service';
 import { IndexDbService } from '../services/index-db.service';
+import { BudgetService } from '../services/budget.service';
 
 @Component({
   selector: 'app-new-budget',
@@ -19,13 +20,13 @@ import { IndexDbService } from '../services/index-db.service';
   styleUrl: './new-budget.component.css',
 })
 export class NewBudgetComponent implements OnInit {
+  sharedService = inject(SharedService);
+  indexDbService = inject(IndexDbService);
+  budgetService = inject(BudgetService);
+
   createNewBudgetForm!: FormGroup;
 
-  constructor(
-    private router: Router,
-    private sharedService: SharedService,
-    private indexDbService: IndexDbService
-  ) {
+  constructor(private router: Router) {
     this.createNewBudgetForm = new FormGroup({
       budgetName: new FormControl('', [Validators.required]),
     });
@@ -39,18 +40,23 @@ export class NewBudgetComponent implements OnInit {
 
   createBudget() {
     const name = this.createNewBudgetForm.get('budgetName')?.value;
+    this.budgetService.budgetName = name;
+    this.budgetService.newBudget = true;
+    this.router.navigate(['/budget-detail']);
+  }
 
-    this.indexDbService.checkBudgetName(name).subscribe((budget) => {
-      if (!budget) {
-        const budget: BudgetDto = {
-          name: name,
-          details: [],
-          baseAmount: 0,
-        };
-        this.sharedService.budget.next(budget);
-        this.sharedService.newBudget.update((v) => (v = true));
-        this.router.navigate(['/budget-detail']);
-      } else alert(`Budget with name: ${name} already exists`);
-    });
+  checkBudgetName(event: any) {
+    const name = event.target.value;
+    this.indexDbService
+      .checkBudgetName(name)
+      .subscribe((budget) => {
+        if (budget) {
+          this.createNewBudgetForm.controls['budgetName'].setErrors({
+            invalid: true,
+          });
+          alert(`Budget with name: ${name} already exists`);
+        }
+      })
+      .unsubscribe();
   }
 }

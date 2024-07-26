@@ -9,33 +9,31 @@ import { IndexDbService } from './index-db.service';
 export class BudgetService {
   budgetName!: string;
   newBudget = false;
-  id!: string;
-
-  percentageSum = computed(() =>
-    this.budget().details.reduce((a, b) => a + b.percentage, 0)
-  );
-  amountSum = computed(() =>
-    this.budget().details.reduce(
-      (a, b) => a + parseFloat(this.retrieveAmount(b.amount)),
-      0
-    )
-  );
-  balance = computed(() => this.budget().baseAmount - this.amountSum());
 
   budget = signal<BudgetDto>({ name: '', baseAmount: 0, details: [] });
 
+  id!: string;
+
   constructor(private indexDBService: IndexDbService) {}
 
-  budgetData(id: string) {
-    this.indexDBService.getBudget(parseInt(id)).subscribe((budget) => {
-      this.budget.update((v) => (v = budget as BudgetDto));
-    });
+  saveNewBudget(budget: BudgetDto) {
+    return this.indexDBService.createBudget(budget);
+  }
+
+  updateBudget(id: string, budget: BudgetDto) {
+    return this.indexDBService.updateBudget(parseInt(id), budget);
+  }
+
+  getBudget(id: string) {
+    return this.indexDBService.getBudget(parseInt(id));
+  }
+
+  deleteBudget(id: string) {
+    this.indexDBService.deleteBudget(parseInt(id));
   }
 
   updateBaseAmount(amount: string) {
-    let money = this.retrieveAmount(amount);
-    this.budget.update((b) => (b = { ...b, baseAmount: parseFloat(money) }));
-    console.log(this.budget());
+    return this.retrieveAmount(amount);
   }
 
   retrieveAmount(money: string): string {

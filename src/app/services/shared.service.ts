@@ -6,12 +6,8 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class SharedService {
-  budget = new BehaviorSubject<BudgetDto>({
-    name: '',
-    baseAmount: 0,
-    details: [],
-  });
-  newBudget = signal<boolean>(false);
+  newBudgetItem!: string;
+  
   hasExistingBudgets = signal<boolean>(false);
 
   constructor() {}

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { IndexDbService } from '../services/index-db.service';
 import { BudgetDto } from '../models/expense.dto';
@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SharedService } from '../services/shared.service';
 import { FormsModule } from '@angular/forms';
+import { BudgetService } from '../services/budget.service';
 @Component({
   selector: 'app-budgets',
   standalone: true,
@@ -14,22 +15,22 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './budgets.component.css',
 })
 export class BudgetsComponent implements OnInit {
+  indexDBService = inject(IndexDbService);
+  sharedService = inject(SharedService);
+  budgetService = inject(BudgetService);
+
   budgets: BudgetDto[] = [];
   filteredBudgets: BudgetDto[] = [];
   searchText!: string;
 
-  constructor(
-    private indexDBService: IndexDbService,
-    private router: Router,
-    private sharedService: SharedService
-  ) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.indexDBService.getAllBudgets().subscribe((values) => {
       this.filteredBudgets = values;
       this.budgets = values;
     });
-    this.sharedService.newBudget.update((v) => (v = false));
+    this.budgetService.newBudget = false;
   }
 
   onChange(event: any) {
