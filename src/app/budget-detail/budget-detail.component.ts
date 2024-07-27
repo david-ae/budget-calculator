@@ -48,6 +48,11 @@ export class BudgetDetailComponent implements OnInit {
   id!: string;
 
   budget = signal<BudgetDto>({ name: '', baseAmount: 0, details: [] });
+  budget2 = signal<BudgetDto | undefined>({
+    name: '',
+    baseAmount: 0,
+    details: [],
+  });
 
   percentageSum = computed(() =>
     this.budget().details.reduce((a, b) => a + b.percentage, 0)
@@ -80,7 +85,8 @@ export class BudgetDetailComponent implements OnInit {
       this.route.queryParams.subscribe((params) => {
         this.id = params['id'];
         if (this.id) {
-          this.budgetService.getBudget(this.id).subscribe((b) => {
+          this.budgetService.getBudget2(this.id);
+          this.budgetService.getBudget(this.id).then((b) => {
             this.budgetName = b?.name as string;
             this.baseAmountForm.setValue({ baseAmount: b?.baseAmount });
             b?.details.forEach((existingBudgetItem) => {
@@ -114,7 +120,6 @@ export class BudgetDetailComponent implements OnInit {
     this.budget.update(
       (v) => (v = { ...v, baseAmount: parseFloat(newBaseAmount) })
     );
-    // this.items.update((v) => (v = this.budget().details));
   }
 
   addBudgetItem() {
@@ -130,10 +135,6 @@ export class BudgetDetailComponent implements OnInit {
             ),
             amount: new FormControl('', [
               Validators.max(this.budget().baseAmount),
-              CustomValidators.BudgetUsageValidator(
-                this.budget().baseAmount,
-                this.amountSum()
-              ),
             ]),
           });
           this.itemControls.push(item);
@@ -146,6 +147,25 @@ export class BudgetDetailComponent implements OnInit {
             (v) => (v = { ...v, details: [...v.details, budgetItem] })
           );
           this.items.update((v) => (v = this.budget().details));
+        }
+      });
+  }
+
+  deleteItem(itemName: string) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: 'Do you want to delete this item from the budget?',
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result === 'confirm') {
+          this.itemControls.controls.forEach((control) => {
+            const budgetItemValue = control.get('budgetItem')?.value;
+            if (budgetItemValue === itemName) {
+              var index = this.itemControls.controls.indexOf(control);
+              this.itemControls.controls.splice(index, 1);
+            }
+          });
         }
       });
   }
@@ -183,34 +203,7 @@ export class BudgetDetailComponent implements OnInit {
               this.toastrService.success('Budget Saved');
               this.budgetService.newBudget = false;
               this.newBudget = this.budgetService.newBudget;
-            }
-          });
-        }
-      });
-  }
-
-  goHome() {
-    this.router.navigate(['/home']);
-  }
-
-  goToViewBudgets() {
-    this.router.navigate(['/budgets']);
-  }
-
-  deleteItem(itemName: string) {
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        data: 'Do you want to delete this item from the budget?',
-      })
-      .afterClosed()
-      .subscribe((result) => {
-        if (result === 'confirm') {
-          this.itemControls.controls.forEach((control) => {
-            const budgetItemValue = control.get('budgetItem')?.value;
-            console.log(budgetItemValue, itemName);
-            if (budgetItemValue === itemName) {
-              var index = this.itemControls.controls.indexOf(control);
-              this.itemControls.controls.splice(index, 1);
+              this.router.navigate(['/budgets']);
             }
           });
         }
@@ -218,19 +211,21 @@ export class BudgetDetailComponent implements OnInit {
   }
 
   updateBudget() {
-    this.dialog
+    const dialogRef = this.dialog
       .open(ConfirmDialogComponent, {
         data: 'Do you want to update this budget?',
       })
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
-          // const budget: BudgetDto = {
-          //   baseAmount: this.baseAmount(),
-          //   name: this.budgetName,
-          //   details: this.items(),
-          //   id: parseInt(this.id),
-          // };
+          this.budgetService
+            .updateBudget(parseInt(this.id), this.budget())
+            .then((response) => {
+              if (response) {
+                this.toastrService.success('Budget Updated');
+                dialogRef.closed = true;
+              }
+            });
         }
       });
   }
@@ -243,11 +238,23 @@ export class BudgetDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
+          this.budgetService
+            .deleteBudget(this.budget().id as number)
+            .then(() => {
+              this.toastrService.success('Budget Deleted');
+              this.router.navigate(['/budgets']);
+            });
         }
       });
   }
 
-  calculateItemPercentages() {}
+  goHome() {
+    this.router.navigate(['/home']);
+  }
+
+  goToViewBudgets() {
+    this.router.navigate(['/budgets']);
+  }
 
   get itemControls() {
     return this.budgetItemsForm.controls['items'] as FormArray;

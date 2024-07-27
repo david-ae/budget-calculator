@@ -127,7 +127,6 @@
                 decimal: '.',
                 align: 'center'
               }"
-              [disabled]="!budgetItemsForm.valid"
               (keyup)="calculatePercentage(item.get('budgetItem')?.value)"
               formControlName="amount"
               type="text"

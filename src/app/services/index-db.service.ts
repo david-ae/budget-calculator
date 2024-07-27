@@ -13,18 +13,17 @@ export class IndexDbService {
 
   constructor() {}
 
-  getAllBudgets(): Observable<BudgetDto[]> {
-    return this.budgets$;
+  async getAllBudgets() {
+    return await db.budgets.toArray();
   }
 
   getBudget(id: number) {
-    return liveQuery(() => db.budgets.get(id));
+    return db.budgets.where({ id: id }).first();
+    // return liveQuery(() => db.budgets.get(id));
   }
 
-  checkBudgetName(budgetName: string) {
-    return liveQuery(() =>
-      db.budgets.where('name').equalsIgnoreCase(budgetName).first()
-    );
+  async checkBudgetName(budgetName: string) {
+    return await db.budgets.where('name').equalsIgnoreCase(budgetName).first();
   }
 
   updateBudget(id: number, budget: BudgetDto) {

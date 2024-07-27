@@ -26,7 +26,7 @@ export class BudgetsComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.indexDBService.getAllBudgets().subscribe((values) => {
+    this.indexDBService.getAllBudgets().then((values) => {
       this.filteredBudgets = values;
       this.budgets = values;
     });
@@ -42,7 +42,7 @@ export class BudgetsComponent implements OnInit {
   }
 
   viewBudget(id?: number) {
-    this.indexDBService.getBudget(id as number).subscribe((budget) => {
+    this.indexDBService.getBudget(id as number).then((budget) => {
       if (budget) {
         this.router.navigate(['/budget-detail'], { queryParams: { id: id } });
       }

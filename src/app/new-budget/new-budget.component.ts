@@ -47,16 +47,13 @@ export class NewBudgetComponent implements OnInit {
 
   checkBudgetName(event: any) {
     const name = event.target.value;
-    this.indexDbService
-      .checkBudgetName(name)
-      .subscribe((budget) => {
-        if (budget) {
-          this.createNewBudgetForm.controls['budgetName'].setErrors({
-            invalid: true,
-          });
-          alert(`Budget with name: ${name} already exists`);
-        }
-      })
-      .unsubscribe();
+    this.indexDbService.checkBudgetName(name).then((budget) => {
+      if (budget) {
+        this.createNewBudgetForm.controls['budgetName'].setErrors({
+          invalid: true,
+        });
+        alert(`Budget with name: ${name} already exists`);
+      }
+    });
   }
 }

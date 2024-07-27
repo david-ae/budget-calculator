@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.indexDBService.getAllBudgets().subscribe((budgets) => {
+    this.indexDBService.getAllBudgets().then((budgets) => {
       if (budgets.length > 0) {
         this.sharedService.hasExistingBudgets.update((value) => (value = true));
         this.hasExistingBudgets = this.sharedService.hasExistingBudgets();

@@ -2,16 +2,15 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { BudgetDto } from '../models/expense.dto';
 import { ItemDto } from '../models/item.dto';
 import { IndexDbService } from './index-db.service';
-
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BehaviorSubject, switchMap } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
 export class BudgetService {
   budgetName!: string;
   newBudget = false;
-
   budget = signal<BudgetDto>({ name: '', baseAmount: 0, details: [] });
-
   id!: string;
 
   constructor(private indexDBService: IndexDbService) {}
@@ -20,16 +19,21 @@ export class BudgetService {
     return this.indexDBService.createBudget(budget);
   }
 
-  updateBudget(id: string, budget: BudgetDto) {
-    return this.indexDBService.updateBudget(parseInt(id), budget);
+  updateBudget(id: number, budget: BudgetDto) {
+    return this.indexDBService.updateBudget(id, budget);
   }
 
   getBudget(id: string) {
     return this.indexDBService.getBudget(parseInt(id));
   }
+  getBudget2(id: string) {
+    this.indexDBService
+      .getBudget(parseInt(id))
+      .then((b) => this.budget.update((g) => (g = b as BudgetDto)));
+  }
 
-  deleteBudget(id: string) {
-    this.indexDBService.deleteBudget(parseInt(id));
+  deleteBudget(id: number) {
+    return this.indexDBService.deleteBudget(id);
   }
 
   updateBaseAmount(amount: string) {
