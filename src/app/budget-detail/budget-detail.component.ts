@@ -10,7 +10,6 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { ItemDto } from '../models/item.dto';
-import { IndexDbService } from '../services/index-db.service';
 import { SharedService } from '../services/shared.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BudgetDto } from '../models/expense.dto';
@@ -20,7 +19,6 @@ import { ToastrService } from 'ngx-toastr';
 import { BudgetService } from '../services/budget.service';
 import { NewBudgetItemDialogComponent } from '../components/dialogs/new-budgetItem-dialog/new-budgetItem-dialog.component';
 import { CommonModule } from '@angular/common';
-import { CustomValidators } from '../../validators/budget-usage.validator';
 
 @Component({
   selector: 'app-budget-detail',

@@ -1,8 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BudgetDto } from '../models/expense.dto';
-import { liveQuery, Observable } from 'dexie';
+import { liveQuery } from 'dexie';
 import { db } from '../db/app-database';
-import { ItemDto } from '../models/item.dto';
 
 @Injectable({
   providedIn: 'root',

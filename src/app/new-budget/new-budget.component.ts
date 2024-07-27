@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -7,7 +7,6 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
-import { BudgetDto } from '../models/expense.dto';
 import { SharedService } from '../services/shared.service';
 import { IndexDbService } from '../services/index-db.service';
 import { BudgetService } from '../services/budget.service';
