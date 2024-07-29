@@ -5,6 +5,12 @@ module.exports = {
     extend: {},
     screens: {
       ssm: "300px",
+      // => @media (min-width: 300px) { ... }
+
+      ssmx: "350px",
+      // => @media (min-width: 350px) { ... }
+
+      ssmxx: "400px",
       // => @media (min-width: 400px) { ... }
 
       sm: "640px",
