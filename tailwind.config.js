@@ -10,7 +10,7 @@ module.exports = {
       ssmx: "350px",
       // => @media (min-width: 350px) { ... }
 
-      ssmxx: "400px",
+      ssmxx: "390px",
       // => @media (min-width: 400px) { ... }
 
       sm: "640px",
