@@ -26,10 +26,10 @@ export class BudgetsComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.indexDBService.getAllBudgets().then((values) => {
-      this.filteredBudgets = values;
-      this.budgets = values;
-    });
+    // this.indexDBService.getAllBudgets().then((values) => {
+    //   this.filteredBudgets = values;
+    //   this.budgets = values;
+    // });
     this.budgetService.newBudget = false;
   }
 
