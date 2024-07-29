@@ -1,8 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BudgetDto } from '../models/expense.dto';
-import { liveQuery, Observable } from 'dexie';
+import { liveQuery } from 'dexie';
 import { db } from '../db/app-database';
-import { ItemDto } from '../models/item.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -13,18 +12,17 @@ export class IndexDbService {
 
   constructor() {}
 
-  getAllBudgets(): Observable<BudgetDto[]> {
-    return this.budgets$;
+  async getAllBudgets() {
+    return await db.budgets.toArray();
   }
 
   getBudget(id: number) {
-    return liveQuery(() => db.budgets.get(id));
+    return db.budgets.where({ id: id }).first();
+    // return liveQuery(() => db.budgets.get(id));
   }
 
-  checkBudgetName(budgetName: string) {
-    return liveQuery(() =>
-      db.budgets.where('name').equalsIgnoreCase(budgetName).first()
-    );
+  async checkBudgetName(budgetName: string) {
+    return await db.budgets.where('name').equalsIgnoreCase(budgetName).first();
   }
 
   updateBudget(id: number, budget: BudgetDto) {
@@ -37,7 +35,7 @@ export class IndexDbService {
   }
 
   async createBudget(record: BudgetDto) {
-    await db.budgets.add(record);
+    return await db.budgets.add(record);
   }
 
   deleteBudget(id: number) {

@@ -1,18 +1,19 @@
 <div class="bg-white">
-  <h2 mat-dialog-title>{{message}}</h2>
+  <h2 mat-dialog-title>{{ message }}</h2>
   <mat-dialog-content>
     <div class="justify-between">
       <button
         mat-raised-button
         mat-dialog-close
-        color="primary"
+        color="accent"
         class="float-left"
       >
         No
       </button>
       <button
         mat-raised-button
-        color="warn"
+        color="primary"
+        (click)="onConfirm()"
         [mat-dialog-close]="'confirm'"
         class="float-right"
       >

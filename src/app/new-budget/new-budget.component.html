@@ -3,7 +3,7 @@
   class="mx-auto my-auto w-1/3 ssm:w-full p-3 gap-y-5 grid grid-col-1 sm:w-3/4 xl:w-1/3"
 >
   <div
-    class="flex items-center justify-center w-full px-5 py-2 text-sm text-gray-700 transition-colors duration-200 border font-bold rounded-md gap-x-2"
+    class="flex items-center justify-center w-full px-5 py-2 text-sm text-gray-700 transition-colors duration-200 font-bold gap-x-2"
   >
     <span>Create Budget</span>
   </div>
@@ -33,6 +33,7 @@
   <input
     type="text"
     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-40"
+    (keyup)="checkBudgetName($event)"
     formControlName="budgetName"
     placeholder="New Budget Name"
   />
