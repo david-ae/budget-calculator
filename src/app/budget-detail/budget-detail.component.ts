@@ -157,13 +157,29 @@ export class BudgetDetailComponent implements OnInit {
       .afterClosed()
       .subscribe((result) => {
         if (result === 'confirm') {
-          this.itemControls.controls.forEach((control) => {
-            const budgetItemValue = control.get('budgetItem')?.value;
-            if (budgetItemValue === itemName) {
-              var index = this.itemControls.controls.indexOf(control);
-              this.itemControls.controls.splice(index, 1);
+          const control = this.itemControls.controls.find(
+            (c) => c.get('budgetItem')?.value === itemName
+          );
+          if (control) {
+            // remove item from ui
+            var index = this.itemControls.controls.indexOf(control);
+            this.itemControls.controls.splice(index, 1);
+            var budgetItem = this.budget().details.find(
+              (i) => i.name === itemName
+            );
+            if (budgetItem) {
+              // remove item from budget object
+              const budgetItemindex = this.budget().details.indexOf(budgetItem);
+              this.items().splice(budgetItemindex, 1);
+              this.budget.update(
+                (b) =>
+                  (b = {
+                    ...b,
+                    details: this.items(),
+                  })
+              );
             }
-          });
+          }
         }
       });
   }
